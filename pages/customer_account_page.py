@@ -1,13 +1,16 @@
-
+import os
 from pages import life_assured_details_page
-
 
 class CustomerAccountPage:
     def __init__(self, page):
         self.page = page
         self.cif_selector = page.locator("//input[@placeholder='Enter Customer ID']")
         self.get_details_button = page.locator("//button[contains(text(),'Get Details')]")
-        self.customer_selector = page.locator("//div/child::div[   p[contains(text(),'Name')]   and   p[contains(text(),'Customer ID:')]   and   p[contains(text(),'Ankur Mishra')] ]")
+        customer_id = os.getenv("CIF_NUMBER")
+        if not customer_id:
+            raise ValueError("CUSTOMER_ID not found in .env file")
+        # self.customer_selector = page.locator(f"//p[contains(text(),'103891426')]/../..")
+        self.customer_selector = page.locator(f"//p[contains(text(),'{customer_id}')]/../..")
         self.proceed_button = page.locator("//div/button[contains(text(), 'Proceed')]")
 
     async def enter_cif_and_get_details(self, cif_number: str):
@@ -18,3 +21,4 @@ class CustomerAccountPage:
         await self.proceed_button.wait_for(state="visible")
         await self.proceed_button.click()
         return life_assured_details_page.LifeAssuredDetailsPage(self.page)
+

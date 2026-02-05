@@ -1,5 +1,6 @@
 from playwright.async_api import Page, expect
 import pytest
+from pages import recommended_plan_page
 
 class SuitabilityMatrixPage:
     def __init__(self, page):
@@ -72,5 +73,5 @@ class SuitabilityMatrixPage:
 
         await self.page.wait_for_url("**/recommended-plans", timeout=20_000)
 
-        return self.page
+        return recommended_plan_page.SelectICICIPlan(self.page)
 
