@@ -1,13 +1,25 @@
 from playwright.async_api import Page, expect
 import pytest
+import os
 from pages import recommended_plan_page
 
 class SuitabilityMatrixPage:
     def __init__(self, page):
         self.page = page
+
+        # Life_Assured_Selectors
+        # Needed to be fill for non self only
+        self.first_name_input = page.locator("//input[@placeholder='Enter First Name']")
+        self.last_name_input = page.locator("//input[@placeholder='Enter Last Name']")
+        self.date_of_birth_input = page.locator("//input[contains(@name,'dob')]")
+        self.mobile = page.locator("//input[contains(@name,'contact_number')]")
+        self.email = page.locator("//input[contains(@name,'email')]")
+
+        # Required for self also
         self.proceed_button = page.locator("//button/child::p[contains(text(),'Proceed')]")
         self.life_assured_section = page.get_by_text("Assist us in identifying the customer's needs and goals, to recommend suitable plans", exact=True)
 
+        # Life_Assured_Requirements Selectors
         self.education_dropdown = page.locator("//p[contains(text(),'Education of the Life Assured')]/ancestor::label/following-sibling::div")
         self.policies_dropdown = page.locator("//p[contains(text(),'How many insurance policies does the Life Assured already have?')]/ancestor::label/following-sibling::div")
         self.occupation_dropdown = page.locator("//p[contains(text(),'Occupation of the Life Assured')]/ancestor::label/following-sibling::div")
@@ -22,6 +34,23 @@ class SuitabilityMatrixPage:
 
     @pytest.mark.asyncio
     async def click_proceed(self):
+        relationship_with_proposer = os.getenv("LIFE_ASSURED_NAME")
+        if relationship_with_proposer.lower() != "self":
+            first_name = os.getenv("LIFE_ASSURED_FIRST_NAME", "Test")
+            await self.first_name_input.fill(first_name)
+
+            last_name = os.getenv("LIFE_ASSURED_LAST_NAME", "User")
+            await self.last_name_input.fill(last_name)
+
+            dob = os.getenv("LIFE_ASSURED_DOB", "1990-01-01")
+            await self.date_of_birth_input.fill(dob)    
+
+            mobile_number = os.getenv("LIFE_ASSURED_MOBILE", "9876543210")
+            await self.mobile.fill(mobile_number)
+
+            email = os.getenv("LIFE_ASSURED_EMAIL", "test.user@example.com")
+            await self.email.fill(email)
+
         # 1️⃣ Ensure the button is present in the DOM
         await expect(self.proceed_button).to_have_count(1)
 
